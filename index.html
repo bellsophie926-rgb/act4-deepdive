@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alina's Lit Final - Act 4 Deep Dive</title>
+    <style>
+        :root { --primary: #4C1D95; --secondary: #5B21B6; --bg-color: #F3F4F6; --text-main: #1F2937; --correct: #10B981; --incorrect: #EF4444; --card-bg: #FFFFFF; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .quiz-container { background-color: var(--card-bg); max-width: 850px; width: 100%; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background-color: var(--primary); color: white; padding: 20px 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .progress-bar { height: 6px; background-color: #E5E7EB; width: 100%; }
+        .progress-fill { height: 100%; background-color: #F59E0B; width: 0%; transition: width 0.3s ease; }
+        .question-box { padding: 30px; }
+        .category-tag { display: inline-block; background-color: #EDE9FE; color: #5B21B6; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
+        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 25px; line-height: 1.5; }
+        .options-list { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { background-color: #F9FAFB; border: 2px solid #E5E7EB; border-radius: 8px; padding: 15px 20px; font-size: 16px; text-align: left; cursor: pointer; transition: all 0.2s ease; color: var(--text-main); }
+        .option-btn:hover:not(:disabled) { background-color: #F5F3FF; border-color: #C4B5FD; }
+        .option-btn:disabled { cursor: not-allowed; }
+        .option-btn.correct { background-color: #D1FAE5; border-color: var(--correct); color: #065F46; font-weight: bold; }
+        .option-btn.wrong { background-color: #FEE2E2; border-color: var(--incorrect); color: #991B1B; }
+        .explanation-box { margin-top: 20px; padding: 20px; background-color: #F3F4F6; border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; display: none; animation: fadeIn 0.5s; }
+        .explanation-box h4 { margin-top: 0; color: var(--primary); margin-bottom: 10px; }
+        .explanation-box p { margin: 0; line-height: 1.5; font-size: 15px; }
+        .source-tag { display: block; margin-top: 10px; font-size: 12px; color: #6B7280; font-style: italic; font-weight: bold; }
+        .controls { padding: 20px 30px; background-color: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; }
+        .next-btn { background-color: var(--primary); color: white; border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; display: none; }
+        .next-btn:hover { background-color: var(--secondary); }
+        .results-screen { text-align: center; padding: 50px 30px; display: none; }
+        .results-screen h2 { font-size: 32px; color: var(--primary); margin-bottom: 10px; }
+        .restart-btn { background-color: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="header"><h1>Act 4 Deep Dive (30 Qs)</h1></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="quizScreen" class="question-box">
+        <span class="category-tag" id="categoryTag"></span>
+        <div class="question-text" id="questionText"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="explanation-box" id="explanationBox">
+            <h4>Teacher's Explanation:</h4><p id="explanationText"></p><span class="source-tag" id="sourceText"></span>
+        </div>
+    </div>
+    <div class="controls" id="controlsBox"><button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button></div>
+    <div id="resultsScreen" class="results-screen">
+        <h2>Act 4 Complete!</h2><p>You scored <strong id="scoreText"></strong> out of <strong id="totalText"></strong>.</p>
+        <button class="restart-btn" onclick="restartQuiz()">Retake Act 4</button>
+    </div>
+</div>
+
+<script>
+const qs = [
+    // Quote 1: Bloody knife umpire (5 Qs)
+    {c:"Act 4 Quote 1: Identification",q:"Who says: 'O, shut the door... ‘Twixt my extremes and me, this bloody knife / Shall play the umpire'?",o:["Romeo","Juliet","Lord Capulet","Friar Lawrence"],a:1,e:"Juliet says this to Friar Lawrence, feeling desperate and trapped because she does not want to marry Paris.",s:""},
+    {c:"Act 4 Quote 1: Literary Device",q:"When Juliet states that the 'bloody knife / Shall play the umpire', she is using a:",o:["Simile","Pun","Metaphor","Alliteration"],a:2,e:"Shakespeare uses a metaphor when Juliet says the 'bloody knife shall play the umpire,' meaning the knife will act as a judge to decide if she lives or dies.",s:""},
+    {c:"Act 4 Quote 1: Literary Device",q:"In the same quote, Juliet threatens suicide immediately if the Friar cannot help her. Because she exaggerates how far she is willing to go, this quote also demonstrates:",o:["Hyperbole","Classical Allusion","Aside","Onomatopoeia"],a:0,e:"There is also hyperbole because she exaggerates how far she is willing to go to avoid the marriage.",s:""},
+    {c:"Act 4 Quote 1: Analysis",q:"What does the 'bloody knife' quote primarily reveal about Juliet's character at this plot moment?",o:["She is a violent murderer.","She strongly loves Romeo and feels completely hopeless.","She wants to assassinate Paris.","She blames the Friar for her problems."],a:1,e:"This quote shows how strongly she loves Romeo and how hopeless she feels, being willing to die rather than betray him.",s:""},
+    
+    // Quote 2: Bid me leap (5 Qs)
+    {c:"Act 4 Quote 2: Identification",q:"Who says: 'O, bid me leap, rather than marry Paris, / From off the battlements of any tower... Or bid me lurk where serpents are'?",o:["Romeo","Mercutio","Juliet","Lady Capulet"],a:2,e:"Juliet says she would rather face many scary and dangerous things than marry Paris.",s:""},
+    {c:"Act 4 Quote 2: Literary Device",q:"By describing 'serpents', 'roaring bears', and 'dead men's rattling bones', Shakespeare is heavily relying on which literary device to make the audience imagine frightening scenes?",o:["Imagery","Simile","Pun","Oxymoron"],a:0,e:"Shakespeare uses imagery by describing snakes, bears, and graves so the audience can clearly imagine these frightening scenes.",s:""},
+    {c:"Act 4 Quote 2: Literary Device",q:"Juliet says she would willingly be chained with bears or hidden in a charnel house. This extreme exaggeration of terrible things she would accept is:",o:["Foreshadowing","Hyperbole","Verbal Irony","Aside"],a:1,e:"There is also hyperbole because Juliet exaggerates the terrible things she would accept.",s:""},
+    {c:"Act 4 Quote 2: Literary Device",q:"The deliberate use of the phrase 'Or bid me...' over and over again in this speech is an example of:",o:["Metaphor","Repetition","Simile","Alliteration"],a:1,e:"The repeated phrase 'Or bid me…' is repetition, which shows her strong determination.",s:""},
+    {c:"Act 4 Quote 2: Analysis",q:"What is the ultimate purpose of Juliet listing all these horrific, terrifying scenarios?",o:["To scare the Friar into giving her money.","To show her loyalty to Romeo and how desperate she is to avoid Paris.","To prove she is braver than Romeo.","To practice for a Halloween play."],a:1,e:"This repetition and imagery show Juliet’s loyalty to Romeo and how desperate she is.",s:""},
+
+    // Quote 3: Take thou this vial (4 Qs)
+    {c:"Act 4 Quote 3: Identification",q:"Who says: 'Take thou this vial, being then in bed... And in this borrowed likeness of shrunk death / Thou shalt continue two and forty hours'?",o:["Apothecary","Lord Capulet","Prince Escalus","Friar Lawrence"],a:3,e:"Friar Lawrence tells Juliet to drink a potion. It will make her look dead for 42 hours.",s:""},
+    {c:"Act 4 Quote 3: Literary Device",q:"The Friar describes the potion's effect: 'The roses in thy lips and cheeks shall fade / To paly ashes'. This is a prime example of:",o:["Imagery","Allusion","Aside","Pun"],a:0,e:"Shakespeare uses imagery to describe how her face will turn pale and she will not breathe.",s:""},
+    {c:"Act 4 Quote 3: Literary Device",q:"The Friar says: 'Thy eyes’ windows fall / Like death when she shuts up the day of life'. Because of the word 'Like', this comparison is a:",o:["Metaphor","Simile","Oxymoron","Hyperbole"],a:1,e:"He uses a simile when he compares her eyes closing to death closing the 'day of life'.",s:""},
+    {c:"Act 4 Quote 3: Plot Context",q:"According to the Friar's plan outlined in this quote, exactly how long will Juliet appear to be dead?",o:["24 hours","42 hours","48 hours","72 hours"],a:1,e:"The quote explicitly states she shall continue in this state for 'two and forty hours' (42 hours).",s:""},
+
+    // Quote 4: Morbid Soliloquy (5 Qs)
+    {c:"Act 4 Quote 4: Terminology",q:"Juliet says: 'How if, when I am laid into the tomb, / I wake before the time that Romeo / Come to redeem me?' She is alone on stage expressing her inner thoughts. This is a:",o:["Dialogue","Aside","Soliloquy","Sonnet"],a:2,e:"A soliloquy is a long speech delivered by a character alone on stage, expressing their inner thoughts to the audience. This is Juliet's 'morbid soliloquy'.",s:""},
+    {c:"Act 4 Quote 4: Analysis",q:"During this soliloquy, what is Juliet's DOMINANT mood?",o:["Joy and excitement","Anger and revenge","Fear and anxiety","Peace and acceptance"],a:2,e:"Her dominant mood is fear and anxiety. She feels very scared and nervous about the tomb.",s:""},
+    {c:"Act 4 Quote 4: Plot/Analysis",q:"Which of the following is ONE of the specific fears Juliet highlights in her morbid soliloquy?",o:["That Romeo will marry someone else.","That she might wake up in the tomb before Romeo comes and die because there is no air.","That Paris will find her and kill her.","That the Friar is actually a Montague spy."],a:1,e:"One of her chosen fears is that she might wake up in the tomb before Romeo comes and die of suffocation because there is no healthsome air.",s:""},
+    {c:"Act 4 Quote 4: Imagery",q:"In this soliloquy, Juliet hallucinates and screams 'Stay, Tybalt, stay!' She is imagining her cousin's ghost seeking out Romeo. This reinforces the use of:",o:["Dark Imagery","Puns","Comedy","Verbal Irony"],a:0,e:"She imagines many terrible things, like ghosts and bones in the tomb, which is a heavy use of dark imagery.",s:""},
+    {c:"Act 4 Quote 4: Plot Conclusion",q:"Despite being overwhelmed by hideous fears and anxiety in this soliloquy, what is Juliet's final action?",o:["She runs away to Mantua.","She decides to drink the potion anyway because she loves Romeo.","She tells the Nurse the truth.","She stabs herself with a dagger immediately."],a:1,e:"Despite her fear and anxiety, she still decides to drink the potion ('Romeo, Romeo, Romeo! Here’s drink.') because she loves Romeo.",s:""},
+
+    // Quote 5: Untimely Frost (4 Qs)
+    {c:"Act 4 Quote 5: Identification",q:"Who says: 'Death lies like an untimely frost / Upon the sweetest flower of all the field'?",o:["Romeo","Friar Lawrence","Capulet","Paris"],a:2,e:"Capulet says this when he thinks Juliet is dead on the morning of her wedding to Paris.",s:""},
+    {c:"Act 4 Quote 5: Literary Device",q:"Because the speaker compares death to a frost using the word 'like', this is an example of a:",o:["Metaphor","Simile","Personification","Hyperbole"],a:1,e:"He compares her to a flower killed by frost. This is a simile.",s:""},
+    {c:"Act 4 Quote 5: Analysis",q:"In Capulet's simile, what does the 'sweetest flower' represent?",o:["His wealth.","Juliet's beauty and youth.","The wedding decorations.","His wife."],a:1,e:"The flower shows Juliet’s beauty and youth. It shows that her 'death' seems very sad and sudden.",s:""},
+    {c:"Act 4 Quote 5: Literary Device",q:"When Capulet is crying over the 'sweetest flower', the audience knows Juliet is actually just asleep from the potion. This creates:",o:["Verbal Irony","Situational Irony","Dramatic Irony","Foil"],a:2,e:"Dramatic Irony: When the audience knows something that the characters (Capulet) do not, creating tension.",s:""},
+
+    // Quote 6: Above the clouds (4 Qs)
+    {c:"Act 4 Quote 6: Identification",q:"Who says: 'The most you sought was her promotion... And weep you now seeing she is advanced / Above the clouds, as high as heaven itself?'",o:["Prince Escalus","Friar Lawrence","Lord Capulet","Nurse"],a:1,e:"Friar Lawrence tells Juliet’s parents they should not cry because she is 'advanced'.",s:""},
+    {c:"Act 4 Quote 6: Literary Device",q:"When the Friar says Juliet is 'Above the clouds', he is using a literary device to represent Heaven. This is a:",o:["Metaphor","Simile","Pun","Onomatopoeia"],a:0,e:"He uses a metaphor when he says she is 'above the clouds' to represent Heaven.",s:""},
+    {c:"Act 4 Quote 6: Literary Device",q:"The Friar's speech ('she is well') is heavily layered with what literary device, given that the audience knows she isn't actually dead?",o:["Dramatic Irony","Alliteration","Aside","Foil"],a:0,e:"There is also irony (Dramatic Irony) because the audience knows Juliet is not really dead.",s:""},
+    {c:"Act 4 Quote 6: Analysis",q:"By mentioning 'promotion' and 'advanced', what is the Friar subtly criticizing about Juliet's parents?",o:["That they didn't pay him enough for the wedding.","That they only cared about elevating her social status by marrying her to Paris, rather than her true happiness.","That they failed to educate her.","That they loved Romeo too much."],a:1,e:"He points out that their main goal was her 'promotion' (social advancement via Paris), and now they weep when she is 'advanced' to heaven.",s:""},
+
+    // General Act 4 Review (3 Qs)
+    {c:"Act 4 Review",q:"The primary focus of Act 4 revolves around:",o:["Romeo's journey to Mantua and his duel with Paris.","The execution of Friar Lawrence's potion plan to save Juliet from bigamy.","The street brawl where Tybalt is killed.","The Capulet's grand masquerade ball."],a:1,e:"Act 4 focuses entirely on Juliet's desperation to avoid marrying Paris and the execution of the 42-hour fake death plan.",s:""},
+    {c:"Act 4 Review",q:"If Lord Capulet had not moved the wedding day from Thursday up to Wednesday, what disaster might have been avoided?",o:["Tybalt wouldn't have died.","The letter to Romeo might have had enough time to arrive, preventing the tragic misunderstanding.","Mercutio would still be alive.","The Prince would have pardoned Romeo."],a:1,e:"Moving the wedding forced Juliet to drink the potion early, disrupting the timeline for the letter to reach Romeo.",s:""},
+    {c:"Act 4 Review",q:"In literature, when an event occurs that is the exact opposite of what is expected (like a wedding turning into a funeral), it is called:",o:["Situational Irony","Verbal Irony","Dramatic Irony","Oxymoron"],a:0,e:"Situational Irony: When the outcome of a situation is the opposite of what is expected. The Capulets expected a joyous wedding, but got a funeral.",s:""}
+];
+
+let curr=0, score=0;
+const catTag = document.getElementById('categoryTag'), qText = document.getElementById('questionText'), opts = document.getElementById('optionsList'), expBox = document.getElementById('explanationBox'), expText = document.getElementById('explanationText'), srcText = document.getElementById('sourceText'), nxtBtn = document.getElementById('nextBtn'), prog = document.getElementById('progressFill');
+
+function loadQ() {
+    const q = qs[curr];
+    prog.style.width = `${(curr/qs.length)*100}%`;
+    catTag.innerText = q.c; qText.innerText = `${curr+1}. ${q.q}`;
+    opts.innerHTML = ''; expBox.style.display = 'none'; nxtBtn.style.display = 'none';
+    q.o.forEach((oText, i) => {
+        const b = document.createElement('button'); b.className = 'option-btn';
+        b.innerHTML = `<strong>${String.fromCharCode(65+i)}.</strong> ${oText}`;
+        b.onclick = () => check(i, b); opts.appendChild(b);
+    });
+}
+function check(idx, btn) {
+    const all = document.querySelectorAll('.option-btn');
+    all.forEach(b => b.disabled = true);
+    if(idx === qs[curr].a) { btn.classList.add('correct'); score++; } 
+    else { btn.classList.add('wrong'); all[qs[curr].a].classList.add('correct'); }
+    expText.innerText = qs[curr].e; srcText.innerText = `Source: ${qs[curr].s}`;
+    expBox.style.display = 'block';
+    nxtBtn.innerText = curr < qs.length-1 ? 'Next Question →' : 'See Results';
+    nxtBtn.style.display = 'block';
+}
+function nextQuestion() { curr++; curr < qs.length ? loadQ() : showRes(); }
+function showRes() {
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('controlsBox').style.display = 'none';
+    prog.style.width = '100%';
+    document.getElementById('scoreText').innerText = score;
+    document.getElementById('totalText').innerText = qs.length;
+    document.getElementById('resultsScreen').style.display = 'block';
+}
+function restartQuiz() {
+    curr=0; score=0;
+    document.getElementById('quizScreen').style.display = 'block';
+    document.getElementById('controlsBox').style.display = 'flex';
+    document.getElementById('resultsScreen').style.display = 'none';
+    loadQ();
+}
+loadQ();
+</script>
+</body>
+</html>
